@@ -1,6 +1,8 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+using System.Linq;
 using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -8,42 +10,37 @@ using UnityEngine.InputSystem;
 
 public class Player : NetworkBehaviour
 {
-    [SerializeField] private Rigidbody2D rigidbody2D;
     [SerializeField] private float speed = 5f;
-    private Vector2 moveDirection = Vector2.zero;
+    NetworkVariable<Vector2> moveDirection = new NetworkVariable<Vector2>();
+    //private Vector2 moveDirection = Vector2.zero;
     public InputMap ActionMap;
-    private InputAction move;
-    private InputAction fire;
-    
-    private void Awake()
+    private void Start()
     {
-        ActionMap = new InputMap();
+        if(!IsLocalPlayer) return;
+            ActionMap = new InputMap();
+            ActionMap.PlayerInput.Movement.Enable();
     }
     
-    private void OnEnable()
-    {
-        move = ActionMap.PlayerInput.Movement;
-        move.Enable();
-    }
-    private void OnDisable()
-    {
-        move.Disable();
-    }
-
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
-
-    private void FixedUpdate()
-    {
-        rigidbody2D.velocity = new Vector2(moveDirection.x * speed, moveDirection.y * speed);
-    }
-
     // Update is called once per frame
     void Update()
     {
-        moveDirection = move.ReadValue<Vector2>();
+        if(!IsServer) return;
+        transform.position += new Vector3(moveDirection.Value.x, moveDirection.Value.y, 0f) * (speed * Time.deltaTime);
+    }
+
+    public void OnMove(InputAction.CallbackContext context)
+    {
+       if(IsOwner)
+       {
+            Vector2 direction = context.ReadValue<Vector2>();
+            MoveRPC(direction);
+            //Debug.Log("1 - OnMove call");
+       }
+    }
+    [Rpc(SendTo.Server)]
+    private void MoveRPC(Vector2 value)
+    {
+        //Debug.Log("2 - MoveRPC call");
+        moveDirection.Value = value;
     }
 }

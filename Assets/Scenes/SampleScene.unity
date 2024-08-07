@@ -172,7 +172,6 @@ MonoBehaviour:
   m_ProtocolType: 0
   m_MaxPacketQueueSize: 128
   m_MaxPayloadSize: 6144
-  m_MaxSendQueueSize: 0
   m_HeartbeatTimeoutMS: 500
   m_ConnectTimeoutMS: 1000
   m_MaxConnectAttempts: 60
@@ -185,13 +184,6 @@ MonoBehaviour:
     PacketDelayMS: 0
     PacketJitterMS: 0
     PacketDropRate: 0
-  m_State: 0
-  m_ServerClientId: 0
-  NetworkManager: {fileID: 0}
-  m_ServerPrivateKey: 
-  m_ServerCertificate: 
-  m_ServerCommonName: 
-  m_ClientCaCertificate: 
 --- !u!114 &229570142
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -204,9 +196,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 593a2fe42fa9d37498c96f9a383b6521, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ServerShutdownState: 0
-  m_ShutdownTimeout: 0
-  m_ShuttingDown: 0
   NetworkConfig:
     ProtocolVersion: 0
     NetworkTransport: {fileID: 229570141}
@@ -214,10 +203,10 @@ MonoBehaviour:
     Prefabs:
       NetworkPrefabsLists:
       - {fileID: 11400000, guid: a54271df02294454cad2997611dd923e, type: 2}
-    TickRate: 30
+    TickRate: 128
     ClientConnectionBufferTimeout: 10
     ConnectionApproval: 0
-    ConnectionData: []
+    ConnectionData: 
     EnableTimeResync: 0
     TimeResyncInterval: 30
     EnsureNetworkVariableLengthSafety: 0
@@ -291,6 +280,7 @@ MonoBehaviour:
   m_Cameras: []
   m_RendererIndex: -1
   m_VolumeLayerMask:
+    serializedVersion: 2
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
@@ -414,11 +404,7 @@ MonoBehaviour:
   m_LightType: 4
   m_BlendStyleIndex: 0
   m_FalloffIntensity: 0.5
-  m_Color:
-    r: 1
-    g: 1
-    b: 1
-    a: 1
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_Intensity: 1
   m_LightVolumeIntensity: 1
   m_LightVolumeIntensityEnabled: 0
@@ -435,13 +421,9 @@ MonoBehaviour:
   m_ShadowIntensity: 0.75
   m_ShadowVolumeIntensityEnabled: 0
   m_ShadowVolumeIntensity: 0.75
-  m_Mesh: {fileID: 0}
-  m_PreviousLightCookieSprite: 0
-  m_CachedPosition: {x: 0, y: 0, z: 0}
   m_LocalBounds:
     m_Center: {x: 0, y: -0.00000011920929, z: 0}
     m_Extent: {x: 0.9985302, y: 0.99853027, z: 0}
-  forceUpdate: 0
   m_PointLightInnerAngle: 360
   m_PointLightOuterAngle: 360
   m_PointLightInnerRadius: 0
@@ -456,12 +438,6 @@ MonoBehaviour:
   - {x: 0.5, y: -0.5, z: 0}
   - {x: 0.5, y: 0.5, z: 0}
   - {x: -0.5, y: 0.5, z: 0}
-  m_PreviousShapeLightFalloffSize: -1
-  m_PreviousShapeLightParametricSides: -1
-  m_PreviousShapeLightParametricAngleOffset: -1
-  m_PreviousShapeLightParametricRadius: -1
-  m_PreviousShapePathHash: -1
-  m_PreviousLightType: 0
 --- !u!4 &619394802
 Transform:
   m_ObjectHideFlags: 0

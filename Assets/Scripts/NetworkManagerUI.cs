@@ -16,8 +16,10 @@ public class NetworkManagerUI : MonoBehaviour
         if (GUILayout.Button("Join"))
         {
             networkManager.StartClient();
-            
         }
-        
+        if(GUILayout.Button("Quit"))
+        {
+            Application.Quit();
+        }
     }
 }
