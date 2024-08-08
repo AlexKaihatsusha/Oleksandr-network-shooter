@@ -7,45 +7,55 @@ using UnityEngine.Rendering.Universal;
 
 public class HealthComponent : NetworkBehaviour
 {
-    [SerializeField] private GameObject Owner;
     [SerializeField] private int MaxHealth = 100;
     private int currentHealth = 0;
-    
+    private GameObject owner;
     delegate void OnDeath();
     OnDeath delegateOnDeath;
      
     private void Start()
     {
         delegateOnDeath += Death;
-       
+        currentHealth = MaxHealth;
         Debug.Log($"HealthComponent: set function Death, TakeDamage");
         
     }
-
+    
     public override void OnNetworkSpawn()
     {
-        currentHealth = MaxHealth;
-        Debug.Log($"HealthComponent: set current health(NETWORK)");
     }
-    
-    public void TakeDamage(int DamageAmount,  GameObject DamageCauser)
+
+    public void Init(GameObject owner)
     {
-        if (Owner == DamageCauser) return;
-        if (currentHealth !<= 0)
+        this.owner = owner;
+    }
+    public void TakeDamage(int DamageAmount, GameObject DamageReceiver, GameObject DamageCauser)
+    {
+        if (DamageReceiver == DamageCauser) return;
+        if (currentHealth > 0)
         {
-            Debug.Log($"HealthComponent: {Owner} took damage - {DamageAmount}");
+            Debug.Log($"HealthComponent: {DamageReceiver} took damage - {DamageAmount}");
             currentHealth -= DamageAmount;
+            if (currentHealth <= 0)
+            {
+                delegateOnDeath();
+            }
         }
         else
         {
-            Debug.Log($"HealthComponent: {Owner} Health below equal zero!");
+            Debug.Log($"HealthComponent: {DamageReceiver} Health below equal zero!");
             delegateOnDeath();
         }
     }
 
     private void Death()
     {
-        Debug.Log($"HealthComponent: {Owner} has been destroyed");
-        Destroy(Owner);
+        Debug.Log($"HealthComponent: {transform.gameObject} has been destroyed");
+        Player playerRef = owner.GetComponent<Player>();
+        if (playerRef)
+        {
+            playerRef.delegateOnDeath();
+        }
+
     }
 }

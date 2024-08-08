@@ -15,6 +15,10 @@ public class Player : NetworkBehaviour
     NetworkVariable<Vector2> moveDirection = new NetworkVariable<Vector2>();
     private HealthComponent healthComponent;
     [SerializeField] private GameObject bulletObject;
+
+    public delegate void OnDeath();
+
+    public OnDeath delegateOnDeath;
     //private Vector2 moveDirection = Vector2.zero;
     public InputMap ActionMap;
     private void Start()
@@ -23,6 +27,9 @@ public class Player : NetworkBehaviour
             ActionMap = new InputMap();
             ActionMap.PlayerInput.Movement.Enable();
             healthComponent = GetComponent<HealthComponent>();
+            healthComponent.Init(this.gameObject);
+            delegateOnDeath = SelfDestroy;
+
     }
     
     // Update is called once per frame
@@ -52,7 +59,16 @@ public class Player : NetworkBehaviour
             }
         }
     }
+
     
+    private void SelfDestroy()
+    {
+        if(NetworkObject.IsSpawned)
+        {
+            //NetworkObject.Despawn(this);
+        }
+        Destroy(this);
+    }
     [Rpc(SendTo.ClientsAndHost)]
     private void ShootRPC()
     {

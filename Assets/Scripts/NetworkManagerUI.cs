@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using Unity.Netcode;
 using UnityEngine;
 
-public class aNetworkManagerUI : MonoBehaviour
+public class NetworkManagerUI : MonoBehaviour
 {
     [SerializeField] private NetworkManager networkManager;
     private void OnGUI()

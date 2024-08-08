@@ -2,55 +2,58 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.Netcode;
+using Unity.Netcode.Components;
 using UnityEngine;
 
 public class Bullet : NetworkBehaviour
 {
     [SerializeField] private int damage = 10;
     private GameObject owner;
+    
     [SerializeField] private float LifeSpan = 2f;
-    [SerializeField] private float BulletMoveSpeed = 3f;
     private float SpawnTime = 0f;
-    // Start is called before the first frame update
-
+    
+    [SerializeField] private float BulletMoveSpeed = 3f;
+    
+    [SerializeField]private Rigidbody2D rb2D;
+    
     public void Init(GameObject owner, Transform transform)
     {
         this.owner = owner;
-        this.transform.position = transform.position;
-        Debug.Log($"{this.owner.ToString()}is set");
+        this.transform.position = transform.position + Vector3.up;
+        //Debug.Log($"{this.owner.ToString()}is set");
     }
+
+    private void Awake()
+    {
+        rb2D = GetComponent<Rigidbody2D>();
+    }
+
     void Start()
     {
-        
         SpawnTime = Time.time;
     }
 
-    private void OnCollisionEnter(Collision other)
+    private void OnCollisionEnter2D(Collision2D other)
     {
-        
-        var otherGameObject = other.transform.gameObject;
-        if (otherGameObject != owner)
+        Debug.Log($"Collision detected with {other.gameObject}");
+       
+        HealthComponent otherObjectHealthComponent = other.gameObject.GetComponent<HealthComponent>();
+        if (otherObjectHealthComponent)
         {
-            HealthComponent otherObjectHealthComponent = otherGameObject.GetComponent<HealthComponent>();
-            if (otherObjectHealthComponent)
-            {
-                otherObjectHealthComponent.TakeDamage(damage, owner);
-                Destroy(this);
-            }
+            otherObjectHealthComponent.TakeDamage(damage,other.gameObject, owner);
+            SelfDestroy();
         }
+        
     }
 
+  
     private void CheckLifeTime(float Time)
     {
         var currentTime = Time;
         if (currentTime - SpawnTime >= LifeSpan)
         {
-            Debug.Log("Destroy bullet");
-            if(NetworkObject.IsSpawned)
-            {
-                NetworkObject.Despawn(this);
-            }
-            Destroy(this.gameObject);
+            SelfDestroy();
         }
     }
     // Update is called once per frame
@@ -60,4 +63,15 @@ public class Bullet : NetworkBehaviour
         transform.position += new Vector3(0, 1, 0f) * (BulletMoveSpeed * Time.deltaTime);
         
     }
+    private void SelfDestroy()
+    {
+        Debug.Log("Destroy bullet");
+        if(NetworkObject.IsSpawned)
+        {
+            NetworkObject.Despawn(this.gameObject);
+            
+        }   
+        Destroy(this.gameObject);
+    }
+    
 }
