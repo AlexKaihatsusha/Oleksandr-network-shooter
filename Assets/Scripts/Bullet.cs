@@ -14,13 +14,17 @@ public class Bullet : NetworkBehaviour
     private float SpawnTime = 0f;
     
     [SerializeField] private float BulletMoveSpeed = 3f;
-    
-    [SerializeField]private Rigidbody2D rb2D;
-    
-    public void Init(GameObject owner, Transform transform)
+    [SerializeField] private Collider2D _collider2D;
+    [SerializeField] private Rigidbody2D rb2D;
+    [SerializeField] private Vector3 direction;
+    public void Init(GameObject owner, Vector3 position, Quaternion rotation, Vector3 direction)
     {
         this.owner = owner;
-        this.transform.position = transform.position + Vector3.up;
+        this.transform.position = position + direction * 0.85f;
+        this.transform.rotation = rotation;
+        this.direction = direction;
+        //Physics2D.IgnoreCollision(_collider2D,owner.GetComponent<Collider2D>());
+       
         //Debug.Log($"{this.owner.ToString()}is set");
     }
 
@@ -36,15 +40,19 @@ public class Bullet : NetworkBehaviour
 
     private void OnCollisionEnter2D(Collision2D other)
     {
-        Debug.Log($"Collision detected with {other.gameObject}");
+        //Debug.Log($"Collision detected with {other.gameObject}");
        
         HealthComponent otherObjectHealthComponent = other.gameObject.GetComponent<HealthComponent>();
         if (otherObjectHealthComponent)
         {
-            otherObjectHealthComponent.TakeDamage(damage,other.gameObject, owner);
+            otherObjectHealthComponent.TakeDamage(damage, owner);
             SelfDestroy();
         }
-        
+        if(owner.TryGetComponent(out PlayersScore playerScore))
+        {
+            if(other.gameObject.TryGetComponent(out ObjectStats objectStats))
+                playerScore.UpdateTheScore(objectStats.score);
+        }
     }
 
   
@@ -59,13 +67,14 @@ public class Bullet : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        CheckLifeTime(Time.time);
-        transform.position += new Vector3(0, 1, 0f) * (BulletMoveSpeed * Time.deltaTime);
+        if(!IsServer) return;
+            CheckLifeTime(Time.time);
+            transform.position += direction * (BulletMoveSpeed * Time.deltaTime);
         
     }
     private void SelfDestroy()
     {
-        Debug.Log("Destroy bullet");
+        //Debug.Log("Destroy bullet");
         if(NetworkObject.IsSpawned)
         {
             NetworkObject.Despawn(this.gameObject);

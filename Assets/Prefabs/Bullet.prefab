@@ -32,7 +32,7 @@ Transform:
   m_GameObject: {fileID: 1196360298249149925}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -2.6948948, y: -2.2884095, z: 0}
+  m_LocalPosition: {x: -2.3031197, y: -1.9627194, z: 0}
   m_LocalScale: {x: 0.3, y: 2, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -137,7 +137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2751903124
+  GlobalObjectIdHash: 2735703395
   InScenePlacedSourceGlobalObjectIdHash: 0
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -174,7 +174,7 @@ MonoBehaviour:
   UseQuaternionSynchronization: 0
   UseQuaternionCompression: 0
   UseHalfFloatPrecision: 0
-  InLocalSpace: 1
+  InLocalSpace: 0
   Interpolate: 1
   SlerpPosition: 0
 --- !u!114 &2343671603930314947
@@ -191,8 +191,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   damage: 10
   LifeSpan: 3
-  BulletMoveSpeed: 3
-  rb2D: {fileID: 0}
+  BulletMoveSpeed: 6
+  _collider2D: {fileID: 8510993816879580677}
+  rb2D: {fileID: 1881223251647317900}
+  direction: {x: 0, y: 0, z: 0}
 --- !u!50 &1881223251647317900
 Rigidbody2D:
   serializedVersion: 4

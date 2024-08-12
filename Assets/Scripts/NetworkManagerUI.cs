@@ -6,20 +6,16 @@ using UnityEngine;
 
 public class NetworkManagerUI : MonoBehaviour
 {
-    [SerializeField] private NetworkManager networkManager;
-    private void OnGUI()
+    public void StartHost()
     {
-        if (GUILayout.Button("Host"))
-        {
-            networkManager.StartHost();
-        }
-        if (GUILayout.Button("Join"))
-        {
-            networkManager.StartClient();
-        }
-        if(GUILayout.Button("Quit"))
-        {
-            Application.Quit();
-        }
+        NetworkManager.Singleton.StartHost();
+    }
+    public void StartClient()
+    {
+        NetworkManager.Singleton.StartClient();
+    }
+    public void Quit()
+    {
+        Application.Quit();
     }
 }

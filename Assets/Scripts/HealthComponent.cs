@@ -17,7 +17,7 @@ public class HealthComponent : NetworkBehaviour
     {
         delegateOnDeath += Death;
         currentHealth = MaxHealth;
-        Debug.Log($"HealthComponent: set function Death, TakeDamage");
+        // Debug.Log($"HealthComponent: set function Death, TakeDamage");
         
     }
     
@@ -29,12 +29,12 @@ public class HealthComponent : NetworkBehaviour
     {
         this.owner = owner;
     }
-    public void TakeDamage(int DamageAmount, GameObject DamageReceiver, GameObject DamageCauser)
+    public void TakeDamage(int DamageAmount, GameObject DamageCauser)
     {
-        if (DamageReceiver == DamageCauser) return;
+        if (gameObject == DamageCauser) return;
         if (currentHealth > 0)
         {
-            Debug.Log($"HealthComponent: {DamageReceiver} took damage - {DamageAmount}");
+            Debug.Log($"HealthComponent: {gameObject} took damage - {DamageAmount}");
             currentHealth -= DamageAmount;
             if (currentHealth <= 0)
             {
@@ -43,7 +43,7 @@ public class HealthComponent : NetworkBehaviour
         }
         else
         {
-            Debug.Log($"HealthComponent: {DamageReceiver} Health below equal zero!");
+            Debug.Log($"HealthComponent: {gameObject} Health below equal zero!");
             delegateOnDeath();
         }
     }
@@ -51,11 +51,12 @@ public class HealthComponent : NetworkBehaviour
     private void Death()
     {
         Debug.Log($"HealthComponent: {transform.gameObject} has been destroyed");
-        Player playerRef = owner.GetComponent<Player>();
-        if (playerRef)
+        
+        /*Player playerRef = owner.gameObject.GetComponent<Player>();
+        if (playerRef != null)
         {
             playerRef.delegateOnDeath();
-        }
+        }*/
 
     }
 }
