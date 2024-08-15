@@ -10,8 +10,8 @@ GameObject:
   m_Component:
   - component: {fileID: 1898976929369226382}
   - component: {fileID: 7083951716405963109}
-  - component: {fileID: 8131859323832826593}
   - component: {fileID: 6977085539365746026}
+  - component: {fileID: 8131859323832826593}
   - component: {fileID: 6072133044786701134}
   - component: {fileID: 6336970676376702320}
   - component: {fileID: 3271779919851881689}
@@ -82,27 +82,6 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 10, y: 1}
   m_EdgeRadius: 0
---- !u!114 &8131859323832826593
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2873120067945317234}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 1162807167
-  InScenePlacedSourceGlobalObjectIdHash: 0
-  AlwaysReplicateAsRoot: 0
-  SynchronizeTransform: 1
-  ActiveSceneSynchronization: 0
-  SceneMigrationSynchronization: 1
-  SpawnWithObservers: 1
-  DontDestroyWithOwner: 0
-  AutoObjectParentSync: 1
 --- !u!50 &6977085539365746026
 Rigidbody2D:
   serializedVersion: 4
@@ -129,7 +108,28 @@ Rigidbody2D:
   m_Interpolate: 0
   m_SleepingMode: 1
   m_CollisionDetection: 0
-  m_Constraints: 4
+  m_Constraints: 7
+--- !u!114 &8131859323832826593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2873120067945317234}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  GlobalObjectIdHash: 1162807167
+  InScenePlacedSourceGlobalObjectIdHash: 0
+  AlwaysReplicateAsRoot: 0
+  SynchronizeTransform: 1
+  ActiveSceneSynchronization: 0
+  SceneMigrationSynchronization: 1
+  SpawnWithObservers: 1
+  DontDestroyWithOwner: 0
+  AutoObjectParentSync: 1
 --- !u!114 &6072133044786701134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -185,6 +185,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 448b0eb4a05770e48bde147661ea319e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ObjectToSpawn: {fileID: 7575163184948420570, guid: bd14cfa04f5f82549a84b06913d9639a, type: 3}
-  AmountToSpawn: 10
-  collider: {fileID: 7083951716405963109}
+  PrefabToSpawn: {fileID: 7575163184948420570, guid: bd14cfa04f5f82549a84b06913d9639a, type: 3}
+  SpawnInteraval: 0.5

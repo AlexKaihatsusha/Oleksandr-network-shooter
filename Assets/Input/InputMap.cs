@@ -44,6 +44,15 @@ public partial class @InputMap: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Chat"",
+                    ""type"": ""Button"",
+                    ""id"": ""2698a2a5-024a-4b4b-97b5-934cd240a5a7"",
+                    ""expectedControlType"": ""Button"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -123,6 +132,17 @@ public partial class @InputMap: IInputActionCollection2, IDisposable
                     ""action"": ""Shooting"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""fcc7e51e-658e-4a97-98ab-6ccc6c3893ee"",
+                    ""path"": ""<Keyboard>/enter"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Chat"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -133,6 +153,7 @@ public partial class @InputMap: IInputActionCollection2, IDisposable
         m_PlayerInput = asset.FindActionMap("PlayerInput", throwIfNotFound: true);
         m_PlayerInput_Movement = m_PlayerInput.FindAction("Movement", throwIfNotFound: true);
         m_PlayerInput_Shooting = m_PlayerInput.FindAction("Shooting", throwIfNotFound: true);
+        m_PlayerInput_Chat = m_PlayerInput.FindAction("Chat", throwIfNotFound: true);
     }
 
     public void Dispose()
@@ -196,12 +217,14 @@ public partial class @InputMap: IInputActionCollection2, IDisposable
     private List<IPlayerInputActions> m_PlayerInputActionsCallbackInterfaces = new List<IPlayerInputActions>();
     private readonly InputAction m_PlayerInput_Movement;
     private readonly InputAction m_PlayerInput_Shooting;
+    private readonly InputAction m_PlayerInput_Chat;
     public struct PlayerInputActions
     {
         private @InputMap m_Wrapper;
         public PlayerInputActions(@InputMap wrapper) { m_Wrapper = wrapper; }
         public InputAction @Movement => m_Wrapper.m_PlayerInput_Movement;
         public InputAction @Shooting => m_Wrapper.m_PlayerInput_Shooting;
+        public InputAction @Chat => m_Wrapper.m_PlayerInput_Chat;
         public InputActionMap Get() { return m_Wrapper.m_PlayerInput; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -217,6 +240,9 @@ public partial class @InputMap: IInputActionCollection2, IDisposable
             @Shooting.started += instance.OnShooting;
             @Shooting.performed += instance.OnShooting;
             @Shooting.canceled += instance.OnShooting;
+            @Chat.started += instance.OnChat;
+            @Chat.performed += instance.OnChat;
+            @Chat.canceled += instance.OnChat;
         }
 
         private void UnregisterCallbacks(IPlayerInputActions instance)
@@ -227,6 +253,9 @@ public partial class @InputMap: IInputActionCollection2, IDisposable
             @Shooting.started -= instance.OnShooting;
             @Shooting.performed -= instance.OnShooting;
             @Shooting.canceled -= instance.OnShooting;
+            @Chat.started -= instance.OnChat;
+            @Chat.performed -= instance.OnChat;
+            @Chat.canceled -= instance.OnChat;
         }
 
         public void RemoveCallbacks(IPlayerInputActions instance)
@@ -248,5 +277,6 @@ public partial class @InputMap: IInputActionCollection2, IDisposable
     {
         void OnMovement(InputAction.CallbackContext context);
         void OnShooting(InputAction.CallbackContext context);
+        void OnChat(InputAction.CallbackContext context);
     }
 }

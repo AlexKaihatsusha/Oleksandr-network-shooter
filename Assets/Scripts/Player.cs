@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using TMPro;
+using Unity.BossRoom.Infrastructure;
 using Unity.Collections;
 using Unity.Netcode;
 using Unity.VisualScripting;
@@ -16,15 +17,17 @@ public class Player : NetworkBehaviour
     [SerializeField] private float speed = 5f;
     NetworkVariable<Vector2> moveDirection = new NetworkVariable<Vector2>();
     
-    [SerializeField] private GameObject bulletObject;
-    [SerializeField] private GameObject Crosshair;
+    [SerializeField] private GameObject bulletPrefab;
+    [SerializeField] private GameObject CrosshairGameObject;
     
     private NetworkVariable<FixedString32Bytes> networkPlayerName = new NetworkVariable<FixedString32Bytes>("Player");
     
     [SerializeField] private TMP_Text playerName;
     private HealthComponent healthComponent;
+    private Rigidbody2D rb2d;
     private Camera _mainCamera;
     private Vector3 _mouseInput;
+    [SerializeField] private Chat _chatRef;
     public delegate void OnDeath();
 
     public OnDeath delegateOnDeath;
@@ -43,7 +46,14 @@ public class Player : NetworkBehaviour
     
     private void Awake()
     {
+        _chatRef = FindObjectOfType<Chat>();
         _mainCamera = Camera.main;
+        if (rb2d == null)
+        {
+            rb2d = GetComponent<Rigidbody2D>();
+        }
+
+        rb2d.isKinematic = false;
     }
     
     public override void OnNetworkSpawn()
@@ -65,29 +75,67 @@ public class Player : NetworkBehaviour
         }
     }
 
+    public void OnMessageSend(InputAction.CallbackContext context)
+    {
+        
+        try
+        {
+            if (IsOwner)
+            {
+                if (context.performed)
+                {
+
+                    if (_chatRef != null)
+                    {
+                        _chatRef.OnSend();
+                    }
+                    else
+                    {
+                        Debug.Log("Chat component not found in scene");
+                    }
+                }
+            }
+        }
+        catch
+        {
+            Debug.LogError("Chat component is NULL");
+        }
+    }
     public void OnShoot(InputAction.CallbackContext context)
     {
         if (IsOwner)
         {
             if (context.performed)
             {
+                //calculate shoot direction
                 Vector3 shootDirection = MousePositionInWorld() - transform.position;
                 shootDirection.Normalize();
                 shootDirection.z = 0f;
+                //calculate angle to rotate bullet object
                 float angleInRadians = Mathf.Atan2(shootDirection.x, shootDirection.y);
                 float angleInDergees = Mathf.Rad2Deg * angleInRadians;
+                //set to variable only Z rotation(since it's 2D)
                 Quaternion shootRotation = Quaternion.Euler(new Vector3(0f,0f,-angleInDergees));
+                //send to Server with parameters
                 ShootServerRPC(shootDirection, shootRotation);   
+                
             }
         }
     }
-    
+
+    private void FixedUpdate()
+    {
+        if (IsOwner)
+        {
+            rb2d.velocity = moveDirection.Value * speed;
+        }
+    }
+
     // Update is called once per frame
     void Update()
     {
         if(!Application.isFocused) return;
         
-        transform.position += new Vector3(moveDirection.Value.x, moveDirection.Value.y, 0f) * (speed * Time.deltaTime);
         if (IsOwner)
         {
             UpdateCrosshairPositionAndRotation(MousePositionInWorld()); 
@@ -105,8 +153,8 @@ public class Player : NetworkBehaviour
         //Debug.Log($"position {crosshair_position}");
         float angleInRadians = Mathf.Atan2(aim_direction.x, aim_direction.y);
         float angleInDergees = Mathf.Rad2Deg * angleInRadians;
-        Crosshair.transform.rotation = Quaternion.Euler(new Vector3(0f,0f, -angleInDergees));
-        Crosshair.transform.position = crosshair_position;
+        CrosshairGameObject.transform.rotation = Quaternion.Euler(new Vector3(0f,0f, -angleInDergees));
+        CrosshairGameObject.transform.position = crosshair_position;
     }
     
     
@@ -118,21 +166,29 @@ public class Player : NetworkBehaviour
         //Debug.Log($"mouse position {mouseWorldPosition}");
         return mouseWorldPosition;
     }
-    private void SpawnBullet(Vector3 ShootDirection, Quaternion ShootRotation)
-    {
-        //Debug.Log("Server spawns bullet");
-        var bullet = Instantiate(bulletObject);
-        var bulletNetworkObject = bullet.GetComponent<NetworkObject>();
-        bullet.GetComponent<Bullet>().Init(transform.gameObject, transform.position, ShootRotation, ShootDirection);
-        bulletNetworkObject.Spawn();
-    }
 
-   
-    [ServerRpc]
+    [Rpc(SendTo.Server)]
     private void ShootServerRPC(Vector3 ShootDirection, Quaternion ShootRotation)
     {
-        //Debug.Log("Server shoot RPC;");
-        SpawnBullet(ShootDirection,ShootRotation);
+        SpawnBullet(ShootDirection, ShootRotation);
+    }
+
+
+    private void SpawnBullet(Vector3 shootDirection, Quaternion shootRotation)
+    {
+        GameObject bullet = NetworkObjectPool.Singleton.GetNetworkObject(bulletPrefab, transform.position + shootDirection * 1f, shootRotation).gameObject;
+        if (bullet == null)
+        {
+            Debug.LogWarning("Failed to get gameobject from pool");
+        }
+        NetworkObject bulletNetworkObject = bullet.GetComponent<NetworkObject>();
+        if(!bulletNetworkObject.IsSpawned)
+        {
+            bulletNetworkObject.Spawn();
+        }
+        bullet.GetComponent<Bullet>().Init(gameObject, shootDirection);
+        bullet.GetComponent<Bullet>().SetBulletVelocity(shootDirection);
+        
     }
     
     [Rpc(SendTo.Server)]
@@ -144,11 +200,11 @@ public class Player : NetworkBehaviour
     
     private void SelfDestroy()
     {
-        if(NetworkObject.IsSpawned)
+        /*if(NetworkObject.IsSpawned)
         {
             //NetworkObject.Despawn(this);
         }
-        Destroy(this);
+        Destroy(this);*/
     }
 
 }

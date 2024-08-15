@@ -1,86 +1,89 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.BossRoom.Infrastructure;
+using Unity.Collections.LowLevel.Unsafe;
 using Unity.Netcode;
 using Unity.Netcode.Components;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class Bullet : NetworkBehaviour
 {
     [SerializeField] private int damage = 10;
     private GameObject owner;
-    
     [SerializeField] private float LifeSpan = 2f;
-    private float SpawnTime = 0f;
     
-    [SerializeField] private float BulletMoveSpeed = 3f;
+    [SerializeField] public float BulletMoveSpeed = 3f;
     [SerializeField] private Collider2D _collider2D;
-    [SerializeField] private Rigidbody2D rb2D;
-    [SerializeField] private Vector3 direction;
-    public void Init(GameObject owner, Vector3 position, Quaternion rotation, Vector3 direction)
+    [SerializeField] private Vector3 moveDirection;
+    [SerializeField] private Rigidbody2D rb2d;
+ 
+    
+    private void Start()
+    {
+        if (IsServer)
+        {
+            Invoke(nameof(SelfDestroy), LifeSpan);
+        }
+        if(rb2d == null)
+            rb2d = GetComponent<Rigidbody2D>();
+
+        rb2d.isKinematic = false;
+    }
+    
+    public void Init(GameObject owner,Vector3 direction)
     {
         this.owner = owner;
-        this.transform.position = position + direction * 0.85f;
-        this.transform.rotation = rotation;
-        this.direction = direction;
-        //Physics2D.IgnoreCollision(_collider2D,owner.GetComponent<Collider2D>());
-       
-        //Debug.Log($"{this.owner.ToString()}is set");
+        moveDirection = direction; 
+        Physics2D.IgnoreCollision(_collider2D, gameObject.GetComponent<Collider2D>());
     }
 
-    private void Awake()
+    public void SetBulletVelocity(Vector2 velocity)
     {
-        rb2D = GetComponent<Rigidbody2D>();
+        rb2d.velocity = velocity * BulletMoveSpeed;
+        SetBulletVelocityClientRpc(velocity);
     }
-
-    void Start()
+    [Rpc(SendTo.ClientsAndHost)]
+    private void SetBulletVelocityClientRpc(Vector2 velocity)
     {
-        SpawnTime = Time.time;
+        if (IsHost)
+        {
+            return;
+        }
+
+        rb2d.velocity = velocity * BulletMoveSpeed;
     }
 
     private void OnCollisionEnter2D(Collision2D other)
     {
         //Debug.Log($"Collision detected with {other.gameObject}");
-       
-        HealthComponent otherObjectHealthComponent = other.gameObject.GetComponent<HealthComponent>();
-        if (otherObjectHealthComponent)
+        // register collision only on network
+        if (!NetworkManager.Singleton.IsServer && !NetworkObject.IsSpawned) return;
+        if (owner != other.gameObject)
         {
-            otherObjectHealthComponent.TakeDamage(damage, owner);
-            SelfDestroy();
+            HealthComponent otherObjectHealthComponent = other.gameObject.GetComponent<HealthComponent>();
+            if (otherObjectHealthComponent)
+            {
+                otherObjectHealthComponent.TakeDamage(damage, NetworkObjectId);
+                SelfDestroy();
+            }
         }
-        if(owner.TryGetComponent(out PlayersScore playerScore))
-        {
-            if(other.gameObject.TryGetComponent(out ObjectStats objectStats))
-                playerScore.UpdateTheScore(objectStats.score);
-        }
-    }
-
-  
-    private void CheckLifeTime(float Time)
+    
+    /*if(owner.TryGetComponent(out PlayersScore playerScore))
     {
-        var currentTime = Time;
-        if (currentTime - SpawnTime >= LifeSpan)
-        {
-            SelfDestroy();
-        }
+        if(other.gameObject.TryGetComponent(out ObjectStats objectStats))
+            playerScore.UpdateTheScore(objectStats.score);
+    }*/
     }
-    // Update is called once per frame
-    void Update()
-    {
-        if(!IsServer) return;
-            CheckLifeTime(Time.time);
-            transform.position += direction * (BulletMoveSpeed * Time.deltaTime);
-        
-    }
+    
     private void SelfDestroy()
     {
-        //Debug.Log("Destroy bullet");
-        if(NetworkObject.IsSpawned)
+        if (!NetworkObject.IsSpawned)
         {
-            NetworkObject.Despawn(this.gameObject);
-            
-        }   
-        Destroy(this.gameObject);
+            return;
+        }
+        NetworkObject.Despawn(true);
     }
     
 }

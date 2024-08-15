@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.BossRoom.Infrastructure;
 using Unity.Netcode;
 using UnityEngine;
 
@@ -8,20 +9,31 @@ public class Meteor : NetworkBehaviour
 {
     [SerializeField] private float moveSpeed = 2f;
     [SerializeField] private int damageAmount = 20;
-
-    public void Init(Vector3 position)
+    private Vector3 moveDirection = Vector3.zero;
+    [SerializeField] private float LifeSpan = 6f;
+  
+    public GameObject prefab;
+    public void Init(Vector3 direction)
     {
-        transform.position = position;
+        
+        moveDirection = direction;
+        moveDirection.z = 0f;
     }
 
+    public override void OnNetworkSpawn()
+    {
+        base.OnNetworkSpawn();
+        enabled = IsServer;
+        Invoke(nameof(SelfDestroy), LifeSpan);
+    }
 
     private void OnCollisionEnter2D(Collision2D other)
     {
         var otherGameObjectHealthComponent = other.gameObject.GetComponent<HealthComponent>();
         
-        if (otherGameObjectHealthComponent)
+        if (otherGameObjectHealthComponent != null)
         {
-            otherGameObjectHealthComponent.TakeDamage(damageAmount, this.gameObject);
+            otherGameObjectHealthComponent.TakeDamage(damageAmount, NetworkObjectId);
             SelfDestroy();
         }
         else
@@ -29,22 +41,21 @@ public class Meteor : NetworkBehaviour
             SelfDestroy();
         }
     }
-    
     private void SelfDestroy()
     {
-        //Debug.Log("Destroy meteor");
-        if(NetworkObject.IsSpawned)
+        if (!NetworkObject.IsSpawned)
         {
-            NetworkObject.Despawn(this.gameObject);
-            
-        }   
-        Destroy(this.gameObject);
+            return;
+        }
+        NetworkObject.Despawn(true);
+        
     }
 
     void Update()
     {
         //since we spawn it from Emitter and Emitter is Server authority
         if (!IsServer) return;
-            transform.position += new Vector3(0f, -1f, 0f) * (moveSpeed * Time.deltaTime);
+            transform.position += moveDirection * (moveSpeed * Time.deltaTime);
+           
     }
 }

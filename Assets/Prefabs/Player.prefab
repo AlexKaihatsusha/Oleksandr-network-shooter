@@ -416,6 +416,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: 00141f9e-d537-4498-be44-fa41313cd346
     m_ActionName: PlayerInput/Shooting[/Keyboard/space,/Mouse/leftButton]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 1691519051290364389}
+        m_TargetAssemblyTypeName: Player, Assembly-CSharp
+        m_MethodName: OnMessageSend
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 2698a2a5-024a-4b4b-97b5-934cd240a5a7
+    m_ActionName: PlayerInput/Chat[/Keyboard/enter]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: PlayerInput
@@ -455,8 +471,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  bulletObject: {fileID: 1196360298249149925, guid: 43686ed37867bb842a842024861044ea, type: 3}
-  Crosshair: {fileID: 10384667388604914}
+  bulletPrefab: {fileID: 1196360298249149925, guid: 43686ed37867bb842a842024861044ea, type: 3}
+  CrosshairGameObject: {fileID: 10384667388604914}
   playerName: {fileID: 2750764024548427555}
 --- !u!114 &7390929352731026467
 MonoBehaviour:
@@ -465,7 +481,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6086044043179780487}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e23b83a3a0bc5744f97838dd3409e5a6, type: 3}
   m_Name: 
