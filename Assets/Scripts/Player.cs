@@ -42,7 +42,9 @@ public class Player : NetworkBehaviour
             healthComponent.Init(this.gameObject);
             delegateOnDeath = SelfDestroy;
             _mainCamera = Camera.main;
+            
     }
+
     
     private void Awake()
     {
@@ -87,7 +89,7 @@ public class Player : NetworkBehaviour
 
                     if (_chatRef != null)
                     {
-                        _chatRef.OnSend();
+                        _chatRef.OnSend(playerName.text);
                     }
                     else
                     {

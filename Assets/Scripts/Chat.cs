@@ -5,6 +5,7 @@ using TMPro;
 using Unity.Collections;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using UnityEngine.UI;
 
 public class Chat : NetworkBehaviour
@@ -14,23 +15,36 @@ public class Chat : NetworkBehaviour
     [SerializeField] private TMP_InputField _inputField;
     [SerializeField] private int maxMessageLength = 125;
     private FixedString128Bytes messageToSend = "";
-
-    [SerializeField] private GameObject chatGameObject;
-
-    private void Start()
-    {
-        chatGameObject.SetActive(true);
-    }
     
 
-    public void OnSend()
+    public static event Action<bool> IsTyping; 
+    private void Start()
+    {
+       
+    }
+    
+    private void Update()
+    {
+        if (_inputField.isFocused && IsLocalPlayer)
+        {
+           
+        }
+        else
+        {
+           
+        }
+    }
+
+    public void OnSend(string playerName)
     {
         Debug.Log("Send message call");
-        string message = _inputField.text;
-        if (message.Length == 0)
+     
+        if (_inputField.text.Length == 0)
         {
             return;
         }
+
+        string message = playerName +"-"+ _inputField.text;
         if (message.Length > maxMessageLength)
         {
             message = message.Substring(0, maxMessageLength);
@@ -39,6 +53,7 @@ public class Chat : NetworkBehaviour
         FixedString128Bytes messageToSend = new FixedString128Bytes(message);
         _inputField.text = "";
         SubmitMessageRPC(messageToSend);
+        
     }
     [Rpc(SendTo.Server)]
     public void SubmitMessageRPC(FixedString128Bytes message)

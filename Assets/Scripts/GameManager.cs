@@ -22,7 +22,7 @@ public class GameManager : NetworkBehaviour
     private NetworkVariable<int> currentWave = new NetworkVariable<int>(0);
     private NetworkVariable<bool> gameStarted = new NetworkVariable<bool>(false);
     private bool isWaveActive = false;
-    
+    [SerializeField] private GameObject chatGameObject;
     private void Awake()
     {
         if (Singleton == null)
@@ -77,7 +77,10 @@ public class GameManager : NetworkBehaviour
         currentWave.Value++;
         isWaveActive = true;
         ToggleEmitter(true);
-
+        if (chatGameObject != null)
+        {
+            chatGameObject.SetActive(false);
+        }
         StartCoroutine
         (
             HandleWaveDuration
@@ -86,6 +89,10 @@ public class GameManager : NetworkBehaviour
             {
                 ToggleEmitter(false);
                 isWaveActive = false;
+                if (chatGameObject != null)
+                {
+                    chatGameObject.SetActive(true);
+                }
                 if (currentWave.Value <= wavesAmount)
                 {
                     countdown.Value = timeBetweenWaves;
