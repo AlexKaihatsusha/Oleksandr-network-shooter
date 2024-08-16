@@ -76,12 +76,9 @@ public class Bullet : NetworkBehaviour
         // register collision only on network
         
         
-        if (NetworkManager.Singleton.IsServer && !NetworkObject.IsSpawned)
+        if (NetworkManager.Singleton.IsServer && NetworkObject.IsSpawned)
         {
-            if (other.gameObject.CompareTag("Bullet"))
-            {
-                SelfDestroy();
-            }
+            
             if (owner != other.gameObject)
             {
                 HealthComponent otherObjectHealthComponent = other.gameObject.GetComponent<HealthComponent>();
@@ -91,7 +88,7 @@ public class Bullet : NetworkBehaviour
                     SelfDestroy();
                 }
                 if(other.gameObject.TryGetComponent(out ObjectStats objectStats) && IsServer)
-                    GameManager.Singleton.UpdateTheScore(objectStats.score);
+                    GameManager.Singleton.UpdateTheScoreRpc(objectStats.score.Value);
             }
             else
             {
@@ -102,7 +99,6 @@ public class Bullet : NetworkBehaviour
         {
             SelfDestroy();
         }
-        
     }
     
     private void SelfDestroy()
@@ -117,8 +113,7 @@ public class Bullet : NetworkBehaviour
             {
                 NetworkObjectPool.Singleton.ReturnNetworkObject(NetworkObject, bulletPrefab);
             }
-            if(!NetworkObject.gameObject.IsDestroyed())
-                NetworkObject.Despawn(true);
+            NetworkObject.Despawn(false);
         }
     }
 }

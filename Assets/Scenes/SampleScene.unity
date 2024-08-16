@@ -3183,7 +3183,7 @@ PrefabInstance:
       objectReference: {fileID: 1065506731}
     - target: {fileID: 6997328495528619285, guid: 2b5166c17275275428ef4eb3d7c0f6e3, type: 3}
       propertyPath: wavesAmount
-      value: 2
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 6997328495528619285, guid: 2b5166c17275275428ef4eb3d7c0f6e3, type: 3}
       propertyPath: countdownText

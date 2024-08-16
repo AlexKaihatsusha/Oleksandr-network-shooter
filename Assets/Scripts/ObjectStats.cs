@@ -5,5 +5,5 @@ using UnityEngine;
 
 public class ObjectStats : NetworkBehaviour
 {
-    public int score = 10;
+    public NetworkVariable<int>  score = new NetworkVariable<int>(10);
 }

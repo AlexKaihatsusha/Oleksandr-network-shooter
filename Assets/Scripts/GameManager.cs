@@ -6,6 +6,7 @@ using Unity.Netcode;
 using Unity.VisualScripting;
 using UnityEngine;
 using TMPro;
+using Unity.Collections.LowLevel.Unsafe;
 
 public class GameManager : NetworkBehaviour
 {
@@ -13,14 +14,14 @@ public class GameManager : NetworkBehaviour
 
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private TMP_Text currentWaveText;
-    [SerializeField]private TMP_Text scoreText;
+    [SerializeField] private TMP_Text scoreText;
 
     [SerializeField] private int wavesAmount = 5;
     [SerializeField] private float timeBetweenWaves = 10f;
     [SerializeField] private float waveDuration = 10.0f;
     
     public NetworkVariable<int> score = new NetworkVariable<int>(0);
-    private NetworkVariable<float> countdown = new NetworkVariable<float>(0f);
+    private NetworkVariable<float> countdown = new NetworkVariable<float>();
     private NetworkVariable<int> currentWave = new NetworkVariable<int>(0);
     private NetworkVariable<bool> gameStarted = new NetworkVariable<bool>(false);  
     private bool isWaveActive = false;
@@ -40,7 +41,7 @@ public class GameManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-      
+        ShowGameDataRPC();
         enabled = IsServer;
         if (IsServer)
         {
@@ -49,7 +50,6 @@ public class GameManager : NetworkBehaviour
             isWaveActive = false;
             gameStarted.Value = false;
         }
-        ShowGameDataRPC();
         countdown.OnValueChanged += UpdateCountDownUI;
         currentWave.OnValueChanged += UpdateWaveCountUI;
         score.OnValueChanged += UpdateScoreUI;
@@ -63,15 +63,9 @@ public class GameManager : NetworkBehaviour
         scoreText.text = "Score: 0";
     }
     
-    private void UpdateScoreUI(int previousValue, int newValue)
-    {
-        if (scoreText != null)
-        {
-            scoreText.text = "Score: " + score.Value;
-        }
-    }
-
-    public void UpdateTheScore(int score)
+   
+    [Rpc(SendTo.Server)]
+    public void UpdateTheScoreRpc(int score)
     {
         this.score.Value += score;
     }
@@ -174,6 +168,13 @@ public class GameManager : NetworkBehaviour
         if (currentWaveText != null)
         {
             currentWaveText.text = "Wave: " + newValue;
+        }
+    }
+    private void UpdateScoreUI(int previousValue, int newValue)
+    {
+        if (scoreText !=  null)
+        {
+            scoreText.text = "Score: " + newValue;
         }
     }
 

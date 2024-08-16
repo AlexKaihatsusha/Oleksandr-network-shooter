@@ -471,10 +471,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
-  TimeToReEnablePlayer: 3
   bulletPrefab: {fileID: 1196360298249149925, guid: 43686ed37867bb842a842024861044ea, type: 3}
   CrosshairGameObject: {fileID: 10384667388604914}
-  shootRate: 0.1
+  shootRate: 0.2
   playerName: {fileID: 2750764024548427555}
   _chatRef: {fileID: 0}
 --- !u!114 &7390929352731026467
