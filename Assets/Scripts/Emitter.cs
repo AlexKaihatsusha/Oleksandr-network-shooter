@@ -38,11 +38,6 @@ public class Emitter : NetworkBehaviour
         }
     }
 
-    private void Start()
-    {
-    }
-
-
     public override void OnNetworkSpawn()
     {
         // Only the server spawns, clients will disable this component on their side

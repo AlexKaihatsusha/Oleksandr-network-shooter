@@ -13,15 +13,11 @@ public class Chat : NetworkBehaviour
     [SerializeField] private GameObject chatMessagePrefab;
     [SerializeField] private Transform chatContent;
     [SerializeField] private TMP_InputField _inputField;
-    [SerializeField] private int maxMessageLength = 125;
+    [SerializeField] private int maxMessageLength = 60;
     private FixedString128Bytes messageToSend = "";
     
 
-    public static event Action<bool> IsTyping; 
-    private void Start()
-    {
-       
-    }
+    
     
     private void Update()
     {
@@ -44,7 +40,7 @@ public class Chat : NetworkBehaviour
             return;
         }
 
-        string message = playerName +"-"+ _inputField.text;
+        string message = playerName +": "+ _inputField.text;
         if (message.Length > maxMessageLength)
         {
             message = message.Substring(0, maxMessageLength);

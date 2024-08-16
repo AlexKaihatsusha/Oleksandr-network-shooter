@@ -13,16 +13,18 @@ public class GameManager : NetworkBehaviour
 
     [SerializeField] private TMP_Text countdownText;
     [SerializeField] private TMP_Text currentWaveText;
+    [SerializeField]private TMP_Text scoreText;
 
     [SerializeField] private int wavesAmount = 5;
     [SerializeField] private float timeBetweenWaves = 10f;
     [SerializeField] private float waveDuration = 10.0f;
-
-    private NetworkVariable<float> countdown = new NetworkVariable<float>();
+    
+    public NetworkVariable<int> score = new NetworkVariable<int>(0);
+    private NetworkVariable<float> countdown = new NetworkVariable<float>(0f);
     private NetworkVariable<int> currentWave = new NetworkVariable<int>(0);
-    private NetworkVariable<bool> gameStarted = new NetworkVariable<bool>(false);
+    private NetworkVariable<bool> gameStarted = new NetworkVariable<bool>(false);  
     private bool isWaveActive = false;
-    [SerializeField] private GameObject chatGameObject;
+ 
     private void Awake()
     {
         if (Singleton == null)
@@ -38,19 +40,41 @@ public class GameManager : NetworkBehaviour
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
+      
+        enabled = IsServer;
         if (IsServer)
         {
             countdown.Value = timeBetweenWaves;
             currentWave.Value = 0;
             isWaveActive = false;
             gameStarted.Value = false;
-            countdownText.text = "";
-            currentWaveText.text = "";
         }
+        ShowGameDataRPC();
         countdown.OnValueChanged += UpdateCountDownUI;
         currentWave.OnValueChanged += UpdateWaveCountUI;
+        score.OnValueChanged += UpdateScoreUI;
+    }
+
+    [Rpc(SendTo.Everyone)]
+    private void ShowGameDataRPC()
+    {
+        countdownText.text = "-";
+        currentWaveText.text = "Wave: 0";
+        scoreText.text = "Score: 0";
     }
     
+    private void UpdateScoreUI(int previousValue, int newValue)
+    {
+        if (scoreText != null)
+        {
+            scoreText.text = "Score: " + score.Value;
+        }
+    }
+
+    public void UpdateTheScore(int score)
+    {
+        this.score.Value += score;
+    }
     private void Update()
     {
         if (!IsServer || !gameStarted.Value) return;
@@ -77,10 +101,6 @@ public class GameManager : NetworkBehaviour
         currentWave.Value++;
         isWaveActive = true;
         ToggleEmitter(true);
-        if (chatGameObject != null)
-        {
-            chatGameObject.SetActive(false);
-        }
         StartCoroutine
         (
             HandleWaveDuration
@@ -89,10 +109,7 @@ public class GameManager : NetworkBehaviour
             {
                 ToggleEmitter(false);
                 isWaveActive = false;
-                if (chatGameObject != null)
-                {
-                    chatGameObject.SetActive(true);
-                }
+                
                 if (currentWave.Value <= wavesAmount)
                 {
                     countdown.Value = timeBetweenWaves;
@@ -104,6 +121,9 @@ public class GameManager : NetworkBehaviour
 
     }
 
+
+    
+    
     private IEnumerator HandleWaveDuration(float waveDuration, Action stopWaveAction)
     {
         yield return new WaitForSeconds(waveDuration);

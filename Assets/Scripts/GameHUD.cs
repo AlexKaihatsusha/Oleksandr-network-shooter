@@ -9,7 +9,6 @@ using UnityEngine.UI;
 public class GameHUD : NetworkBehaviour
 {
     public static GameHUD Singleton;
-    [SerializeField] private TMP_Text _playersScore;
     [SerializeField] private Button _readyButton;
 
     private void Awake()

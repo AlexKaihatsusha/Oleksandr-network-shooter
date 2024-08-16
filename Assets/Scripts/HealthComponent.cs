@@ -66,6 +66,7 @@ public class HealthComponent : NetworkBehaviour
     }
 
 
+    
     private void HandleDealth()
     {
         delegateOnDeath?.Invoke();

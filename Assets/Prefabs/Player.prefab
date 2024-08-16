@@ -449,7 +449,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GlobalObjectIdHash: 2885743375
+  GlobalObjectIdHash: 1257719817
   InScenePlacedSourceGlobalObjectIdHash: 1257719817
   AlwaysReplicateAsRoot: 0
   SynchronizeTransform: 1
@@ -471,9 +471,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   speed: 5
+  TimeToReEnablePlayer: 3
   bulletPrefab: {fileID: 1196360298249149925, guid: 43686ed37867bb842a842024861044ea, type: 3}
   CrosshairGameObject: {fileID: 10384667388604914}
+  shootRate: 0.1
   playerName: {fileID: 2750764024548427555}
+  _chatRef: {fileID: 0}
 --- !u!114 &7390929352731026467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -481,7 +484,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6086044043179780487}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e23b83a3a0bc5744f97838dd3409e5a6, type: 3}
   m_Name: 

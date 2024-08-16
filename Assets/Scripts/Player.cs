@@ -19,7 +19,8 @@ public class Player : NetworkBehaviour
     
     [SerializeField] private GameObject bulletPrefab;
     [SerializeField] private GameObject CrosshairGameObject;
-    
+    [SerializeField] private float shootRate = 0.3f;
+     private float lastShootTime;
     private NetworkVariable<FixedString32Bytes> networkPlayerName = new NetworkVariable<FixedString32Bytes>("Player");
     
     [SerializeField] private TMP_Text playerName;
@@ -27,10 +28,9 @@ public class Player : NetworkBehaviour
     private Rigidbody2D rb2d;
     private Camera _mainCamera;
     private Vector3 _mouseInput;
+    
     [SerializeField] private Chat _chatRef;
-    public delegate void OnDeath();
-
-    public OnDeath delegateOnDeath;
+   
     //private Vector2 moveDirection = Vector2.zero;
     public InputMap ActionMap;
     private void Start()
@@ -40,11 +40,9 @@ public class Player : NetworkBehaviour
             ActionMap.PlayerInput.Movement.Enable();
             healthComponent = GetComponent<HealthComponent>();
             healthComponent.Init(this.gameObject);
-            delegateOnDeath = SelfDestroy;
             _mainCamera = Camera.main;
             
     }
-
     
     private void Awake()
     {
@@ -54,18 +52,17 @@ public class Player : NetworkBehaviour
         {
             rb2d = GetComponent<Rigidbody2D>();
         }
-
+       
         rb2d.isKinematic = false;
     }
     
     public override void OnNetworkSpawn()
     {
         base.OnNetworkSpawn();
-        
-        networkPlayerName.Value = "Player " + (OwnerClientId + 1);
+        networkPlayerName.Value = "Player " + (OwnerClientId+1);
         playerName.text = networkPlayerName.Value.ToString();
     }
-
+    
     
     public void OnMove(InputAction.CallbackContext context)
     {
@@ -109,18 +106,25 @@ public class Player : NetworkBehaviour
         {
             if (context.performed)
             {
-                //calculate shoot direction
-                Vector3 shootDirection = MousePositionInWorld() - transform.position;
-                shootDirection.Normalize();
-                shootDirection.z = 0f;
-                //calculate angle to rotate bullet object
-                float angleInRadians = Mathf.Atan2(shootDirection.x, shootDirection.y);
-                float angleInDergees = Mathf.Rad2Deg * angleInRadians;
-                //set to variable only Z rotation(since it's 2D)
-                Quaternion shootRotation = Quaternion.Euler(new Vector3(0f,0f,-angleInDergees));
-                //send to Server with parameters
-                ShootServerRPC(shootDirection, shootRotation);   
-                
+                var currentTime = Time.time;
+                if (currentTime- lastShootTime >= shootRate)
+                {
+                    lastShootTime = currentTime;
+               
+                    //calculate shoot direction
+                    Vector3 shootDirection = MousePositionInWorld() - transform.position;
+                    shootDirection.Normalize();
+                    shootDirection.z = 0f;
+                    //calculate angle to rotate bullet object
+                    float angleInRadians = Mathf.Atan2(shootDirection.x, shootDirection.y);
+                    float angleInDergees = Mathf.Rad2Deg * angleInRadians;
+                    //set to variable only Z rotation(since it's 2D)
+                    Quaternion shootRotation = Quaternion.Euler(new Vector3(0f,0f,-angleInDergees));
+                    //send to Server with parameters
+
+                    if(!IsHost)SpawnBulletLocally(shootDirection, shootRotation);
+                        ShootServerRPC(shootDirection, shootRotation);   
+                }
             }
         }
     }
@@ -172,11 +176,17 @@ public class Player : NetworkBehaviour
     [Rpc(SendTo.Server)]
     private void ShootServerRPC(Vector3 ShootDirection, Quaternion ShootRotation)
     {
-        SpawnBullet(ShootDirection, ShootRotation);
+        SpawnBulletOnServer(ShootDirection, ShootRotation);
     }
 
-
-    private void SpawnBullet(Vector3 shootDirection, Quaternion shootRotation)
+    private void SpawnBulletLocally(Vector3 shootDirection, Quaternion shootRotation)
+    {
+        GameObject bulletGameObject = Instantiate(bulletPrefab, transform.position + shootDirection * 1f, shootRotation);
+        Bullet bullet = bulletGameObject.GetComponent<Bullet>();
+        bullet.Init(gameObject, shootDirection);
+        
+    }
+    private void SpawnBulletOnServer(Vector3 shootDirection, Quaternion shootRotation)
     {
         GameObject bullet = NetworkObjectPool.Singleton.GetNetworkObject(bulletPrefab, transform.position + shootDirection * 1f, shootRotation).gameObject;
         if (bullet == null)
@@ -190,6 +200,8 @@ public class Player : NetworkBehaviour
         }
         bullet.GetComponent<Bullet>().Init(gameObject, shootDirection);
         bullet.GetComponent<Bullet>().SetBulletVelocity(shootDirection);
+        bullet.GetComponent<Bullet>().bulletPrefab = bulletPrefab;
+        bullet.GetComponent<Bullet>().HideBulletOnClientRpc();
         
     }
     
@@ -200,13 +212,5 @@ public class Player : NetworkBehaviour
         moveDirection.Value = value;
     }
     
-    private void SelfDestroy()
-    {
-        /*if(NetworkObject.IsSpawned)
-        {
-            //NetworkObject.Despawn(this);
-        }
-        Destroy(this);*/
-    }
 
 }

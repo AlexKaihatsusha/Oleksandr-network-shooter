@@ -11,8 +11,16 @@ public class Meteor : NetworkBehaviour
     [SerializeField] private int damageAmount = 20;
     private Vector3 moveDirection = Vector3.zero;
     [SerializeField] private float LifeSpan = 6f;
+    [SerializeField] private Rigidbody2D rb2d;
   
     public GameObject prefab;
+
+    private void Awake()
+    {
+        rb2d = GetComponent<Rigidbody2D>();
+        rb2d.isKinematic = false;
+    }
+
     public void Init(Vector3 direction)
     {
         
@@ -24,11 +32,14 @@ public class Meteor : NetworkBehaviour
     {
         base.OnNetworkSpawn();
         enabled = IsServer;
-        Invoke(nameof(SelfDestroy), LifeSpan);
+        if(IsServer)
+            Invoke(nameof(SelfDestroy), LifeSpan);
     }
 
     private void OnCollisionEnter2D(Collision2D other)
     {
+        if(!NetworkManager.Singleton.IsServer) return;
+        
         var otherGameObjectHealthComponent = other.gameObject.GetComponent<HealthComponent>();
         
         if (otherGameObjectHealthComponent != null)
@@ -51,11 +62,11 @@ public class Meteor : NetworkBehaviour
         
     }
 
-    void Update()
+    private void FixedUpdate()
     {
-        //since we spawn it from Emitter and Emitter is Server authority
         if (!IsServer) return;
-            transform.position += moveDirection * (moveSpeed * Time.deltaTime);
-           
+        rb2d.velocity = moveDirection * moveSpeed;
     }
+
+    
 }

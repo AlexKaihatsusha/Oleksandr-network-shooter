@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 2343671603930314947}
   m_Layer: 0
   m_Name: Bullet
-  m_TagString: Untagged
+  m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -189,3 +189,4 @@ MonoBehaviour:
   _collider2D: {fileID: 8510993816879580677}
   moveDirection: {x: 0, y: 0, z: 0}
   rb2d: {fileID: 1881223251647317900}
+  bulletPrefab: {fileID: 1196360298249149925}
