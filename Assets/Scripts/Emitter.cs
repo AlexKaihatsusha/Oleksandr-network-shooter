@@ -18,6 +18,10 @@ public class Emitter : NetworkBehaviour
     private List<Vector3> worldCorners = new List<Vector3>();
     private List<Vector3[]> worldEdges = new List<Vector3[]>();
     private Camera _mainCamera;
+    public ref GameObject GetGameObjectToSpawn()
+    {
+        return ref PrefabToSpawn;
+    }
     private void Awake()
     {
         _mainCamera = Camera.main;

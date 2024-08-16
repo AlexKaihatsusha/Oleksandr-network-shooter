@@ -18,11 +18,10 @@ public class Bullet : NetworkBehaviour
     [SerializeField] private Collider2D _collider2D;
     [SerializeField] private Vector3 moveDirection;
     [SerializeField] private Rigidbody2D rb2d;
-
+    
     public GameObject bulletPrefab;
     private void Start()
     {
-        Invoke(nameof(SelfDestroy), LifeSpan);
         if(rb2d == null)
             rb2d = GetComponent<Rigidbody2D>();
 
@@ -35,8 +34,10 @@ public class Bullet : NetworkBehaviour
         moveDirection = direction;
         SetBulletVelocity(direction);
         Physics2D.IgnoreCollision(_collider2D, gameObject.GetComponent<Collider2D>());
-        if(IsServer)
-           Invoke(nameof(SelfDestroy), LifeSpan);
+        if (IsServer)
+        {
+            Invoke(nameof(SelfDestroy), LifeSpan);
+        }
     }
     
     public void SetBulletVelocity(Vector2 velocity)
@@ -50,35 +51,23 @@ public class Bullet : NetworkBehaviour
         
     }
 
-    [Rpc(SendTo.ClientsAndHost)]
-    public void HideBulletOnClientRpc()
-    {
-        if (IsHost)
-        {
-            return;
-        }
-        //Debug.Log("Hide bullet from clients");
-        gameObject.SetActive(false);
-    }
+   
     [Rpc(SendTo.ClientsAndHost)]
     private void SetBulletVelocityClientRpc(Vector2 velocity)
     {
-        if (IsHost)
+        if (!IsHost)
         {
-            return;
+            rb2d.velocity = velocity * BulletMoveSpeed;
         }
-        rb2d.velocity = velocity * BulletMoveSpeed;
     }
 
     private void OnCollisionEnter2D(Collision2D other)
     {
         //Debug.Log($"Collision detected with {other.gameObject}");
         // register collision only on network
-        
-        
-        if (NetworkManager.Singleton.IsServer && NetworkObject.IsSpawned)
+
+        if (IsServer && NetworkObject.IsSpawned)
         {
-            
             if (owner != other.gameObject)
             {
                 HealthComponent otherObjectHealthComponent = other.gameObject.GetComponent<HealthComponent>();
@@ -95,25 +84,19 @@ public class Bullet : NetworkBehaviour
                 SelfDestroy();
             }
         }
-        else
-        {
-            SelfDestroy();
-        }
     }
     
     private void SelfDestroy()
     {
-        if (!IsServer && !IsHost)
-        {
-            Destroy(gameObject);
-        }
-        else if (IsServer && NetworkObject.IsSpawned)
+       
+         if (IsServer && NetworkObject.IsSpawned)
         {
             if (NetworkObjectPool.Singleton != null)
             {
                 NetworkObjectPool.Singleton.ReturnNetworkObject(NetworkObject, bulletPrefab);
+                NetworkObject.Despawn(false);
             }
-            NetworkObject.Despawn(false);
+           
         }
     }
 }

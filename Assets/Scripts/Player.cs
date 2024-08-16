@@ -122,13 +122,14 @@ public class Player : NetworkBehaviour
                     Quaternion shootRotation = Quaternion.Euler(new Vector3(0f,0f,-angleInDergees));
                     //send to Server with parameters
 
-                    if(!IsHost)SpawnBulletLocally(shootDirection, shootRotation);
-                        ShootServerRPC(shootDirection, shootRotation);   
+                    
+                    
+                    ShootServerRPC(shootDirection, shootRotation);   
                 }
             }
         }
     }
-
+    
     private void FixedUpdate()
     {
         if (IsOwner)
@@ -179,16 +180,10 @@ public class Player : NetworkBehaviour
         SpawnBulletOnServer(ShootDirection, ShootRotation);
     }
 
-    private void SpawnBulletLocally(Vector3 shootDirection, Quaternion shootRotation)
-    {
-        GameObject bulletGameObject = Instantiate(bulletPrefab, transform.position + shootDirection * 1f, shootRotation);
-        Bullet bullet = bulletGameObject.GetComponent<Bullet>();
-        bullet.Init(gameObject, shootDirection);
-        
-    }
+    
     private void SpawnBulletOnServer(Vector3 shootDirection, Quaternion shootRotation)
     {
-        GameObject bullet = NetworkObjectPool.Singleton.GetNetworkObject(bulletPrefab, transform.position + shootDirection * 1f, shootRotation).gameObject;
+        GameObject bullet = NetworkObjectPool.Singleton.GetNetworkObject(bulletPrefab, transform.position + shootDirection * 0.75f, shootRotation).gameObject;
         if (bullet == null)
         {
             Debug.LogWarning("Failed to get gameobject from pool");
@@ -201,8 +196,6 @@ public class Player : NetworkBehaviour
         bullet.GetComponent<Bullet>().Init(gameObject, shootDirection);
         bullet.GetComponent<Bullet>().SetBulletVelocity(shootDirection);
         bullet.GetComponent<Bullet>().bulletPrefab = bulletPrefab;
-        bullet.GetComponent<Bullet>().HideBulletOnClientRpc();
-        
     }
     
     [Rpc(SendTo.Server)]

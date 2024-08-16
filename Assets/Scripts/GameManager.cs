@@ -128,6 +128,7 @@ public class GameManager : NetworkBehaviour
         GameObject emitterGameObject = GameObject.Find("Emitter");
         if (emitterGameObject != null && emitterGameObject.TryGetComponent<Emitter>(out Emitter emitter))
         {
+            emitter.GetGameObjectToSpawn().GetComponent<Meteor>().AddMeteorSpeed(2f);
             emitter.Spawn(spawn);
         }
     }
@@ -145,8 +146,8 @@ public class GameManager : NetworkBehaviour
     {
         Debug.Log("GAME END");
         ToggleEmitter(false);
-        countdown.Value = 0;
-        currentWave.Value = 0;
+        //countdown.Value = 0;
+        //currentWave.Value = 0;
     }
     private void UpdateCountDownUI(float previousValue, float newValue)
     {

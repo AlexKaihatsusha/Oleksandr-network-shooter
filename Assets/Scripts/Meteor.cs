@@ -7,14 +7,19 @@ using UnityEngine;
 
 public class Meteor : NetworkBehaviour
 {
-    [SerializeField] private float moveSpeed = 2f;
+    [SerializeField] private float moveSpeed = 1f;
     [SerializeField] private int damageAmount = 20;
     private Vector3 moveDirection = Vector3.zero;
-    [SerializeField] private float LifeSpan = 6f;
+    [SerializeField] private float LifeSpan = 15f;
     [SerializeField] private Rigidbody2D rb2d;
   
     public GameObject prefab;
 
+   
+    public void AddMeteorSpeed(float AdditionalSpeedAmount)
+    {
+        moveSpeed+= AdditionalSpeedAmount;
+    }
     private void Awake()
     {
         rb2d = GetComponent<Rigidbody2D>();
